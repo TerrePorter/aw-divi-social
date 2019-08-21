@@ -111,9 +111,9 @@ class AW_Divi_Social_Media
     public function __construct($file = '', $version = '1.0.0')
     {
         // log init
-        aw_debug('-------------------------------------');
-        aw_debug(get_class($this) . ' Initialized ');
-        aw_debug(date("F j, Y, g:i a"));
+        $this->aw_debug('-------------------------------------');
+        $this->aw_debug(get_class($this) . ' Initialized ');
+        $this->aw_debug(date("F j, Y, g:i a"));
 
         $this->_version = $version;
         $this->_token = 'aw_divi_social';
@@ -126,13 +126,13 @@ class AW_Divi_Social_Media
 
         // Load API for generic admin functions
         if (is_admin()) {
-            aw_debug(' - attaching admin hooks and styles');
+            $this->aw_debug(' - attaching admin hooks and styles');
             add_filter('et_epanel_layout_data', array($this, 'et_epanel_layout_data'));
             add_action('admin_enqueue_scripts', array($this, 'enqueue_styles_admin'), 10);
         }
 
         // log
-        aw_debug(' - attaching public hooks and styles');
+        $this->aw_debug(' - attaching public hooks and styles');
 
         // Load frontend JS & CSS
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'), 10);
@@ -157,7 +157,8 @@ class AW_Divi_Social_Media
     /**
      *
      */
-    function update_debug_mode() {
+    public function update_debug_mode()
+    {
         $this->debug_enabled = get_option('divi_enable_AWDiviSocialDebug', $this->debug_enabled);
     }
 
@@ -169,7 +170,7 @@ class AW_Divi_Social_Media
     public function __clone()
     {
         // log
-        aw_debug(' - WARNING: as attempt to clone class detected');
+        $this->aw_debug(' - WARNING: as attempt to clone class detected');
         // fail
         _doing_it_wrong(__FUNCTION__, __('Please don\'t try to clone this object'), $this->_version);
     }
@@ -182,7 +183,7 @@ class AW_Divi_Social_Media
     public function __wakeup()
     {
         //
-        aw_debug(' - WARNING: an attempt to give class coffee was detected');
+        $this->aw_debug(' - WARNING: an attempt to give class coffee was detected');
         //
         _doing_it_wrong(__FUNCTION__, __('Please don\'t try to wakeup this object'), $this->_version);
     }
@@ -195,7 +196,7 @@ class AW_Divi_Social_Media
     public function enqueue_styles_admin()
     {
         //
-        aw_debug(' - function executed: enqueue_styles_admin');
+        $this->aw_debug(' - function executed: enqueue_styles_admin');
         //
         wp_enqueue_script('aw-divi-social', esc_url($this->assets_url) . '/aw-divi-social.js', ['epanel_functions_init'], '0.1');
     }
@@ -209,12 +210,10 @@ class AW_Divi_Social_Media
     public function enqueue_styles()
     {
         //
-        aw_debug(' - function executed: enqueue_styles');
+        $this->aw_debug(' - function executed: enqueue_styles');
         //
         wp_register_style($this->_token . '-font-awesome', esc_url($this->assets_url) . 'font-awesome/fontawesome-all.min.css', array(), $this->_version);
         wp_enqueue_style($this->_token . '-font-awesome');
-
-
     }
 
     /**
@@ -235,7 +234,7 @@ class AW_Divi_Social_Media
     public static function instance($file = '', $version = '1.0.0')
     {
         //
-        aw_debug(' - function executed: instance');
+        //aw_debug(' - function executed: instance');
         //
         if (is_null(self::$_instance)) {
             self::$_instance = new self($file, $version);
@@ -258,7 +257,7 @@ class AW_Divi_Social_Media
         $new_options = array();
 
         //
-        aw_debug(' - function executed: et_epanel_layout_data');
+        $this->aw_debug(' - function executed: et_epanel_layout_data');
 
         // if this array is updated, need to update array in templates/social-icons.php
         $additional_options = array(
@@ -285,17 +284,16 @@ class AW_Divi_Social_Media
         );
 
         //
-        aw_debug(' - found ' . count($additional_options) . ' to inject in to setting form');
+        $this->aw_debug(' - found ' . count($additional_options) . ' to inject in to setting form');
 
         // build new social setting options
         foreach ($additional_options as $option_name => $option_title) {
-
             //
-            aw_debug(' - building setting form field block for ' . $option_name);
+            $this->aw_debug(' - building setting form field block for ' . $option_name);
 
             $new_options[] = array(
                 'name' => sprintf(
-                /* translators: %s: option title */
+                    /* translators: %s: option title */
                     esc_html__('Show %s Icon', 'divi'),
                     $option_title
                 ),
@@ -303,7 +301,7 @@ class AW_Divi_Social_Media
                 'type' => 'checkbox',
                 'std' => 'on',
                 'desc' => sprintf(
-                /* translators: %s: option title */
+                    /* translators: %s: option title */
                     esc_html__('Here you can choose to display the %s Icon on your homepage', 'divi'),
                     $option_title
                 ),
@@ -319,7 +317,7 @@ class AW_Divi_Social_Media
 
             $new_options[] = array(
                 'name' => sprintf(
-                /* translators: %s: option title */
+                    /* translators: %s: option title */
                     esc_html__('%s Url', 'divi'),
                     $option_title
                 ),
@@ -328,7 +326,7 @@ class AW_Divi_Social_Media
                 'type' => 'text',
                 'validation_type' => 'url',
                 'desc' => sprintf(
-                /* translators: %s: option title */
+                    /* translators: %s: option title */
                     esc_html__('Enter your  %s Url', 'divi'),
                     $option_title
                 ),
@@ -343,7 +341,6 @@ class AW_Divi_Social_Media
                 "desc" => esc_html__("Enter the title to use when the user hovers the social icon. ", 'divi')
             );
 
-
             $new_options[] = array("name" => "general-1a", "type" => "panelwrapper-end",);
         }
 
@@ -353,7 +350,7 @@ class AW_Divi_Social_Media
     private function extract_preset_social_links($options, $new_options)
     {
         //
-        aw_debug(' - function executed: extract_preset_social_links');
+        $this->aw_debug(' - function executed: extract_preset_social_links');
 
         //
         $original_options = $options;
@@ -400,7 +397,7 @@ class AW_Divi_Social_Media
         $original_options = array_values($original_options);
 
         //
-        aw_debug(' - found ' . count($updateOptions) . ' to extend in settings page');
+        $this->aw_debug(' - found ' . count($updateOptions) . ' to extend in settings page');
 
         // setup the extra toggle for the debug log
         $extracted_options = [];
@@ -428,10 +425,8 @@ class AW_Divi_Social_Media
 
         // should not happen, but just incase
         if (!empty($updateOptions)) {
-
             // process the extracted items
             foreach ($updateOptions as $option_name => $option_value) {
-
                 // $option_value[]
                 // 0 = checkbox
                 // 1 = url
@@ -467,15 +462,16 @@ class AW_Divi_Social_Media
                 $extracted_options[] = array("name" => "general-1a", "type" => "panelwrapper-end",);
 
                 //
-                aw_debug(' - updated setting form fields for ' . $option_name);
+                $this->aw_debug(' - updated setting form fields for ' . $option_name);
 
                 if (isset($haystackInsertLocList[$option_name])) {
-
                     //
                     // if rss, then keep it in the general tab but update the layout
                     if ($option_name == 'rss') {
-                        $insertLocCustom = $this->find_option_location1($original_options,
-                            ['id' => $haystackInsertLocList[$option_name]]);
+                        $insertLocCustom = $this->find_option_location1(
+                            $original_options,
+                            ['id' => $haystackInsertLocList[$option_name]]
+                        );
 
                         // if the item is not found for some reason, fall back to the base array insert location
                         if (!$insertLocCustom[0]) {
@@ -484,10 +480,11 @@ class AW_Divi_Social_Media
 
                         // insert the new options in to the main options array
                         array_splice($original_options, $insertLocCustom[1], 0, $extracted_options);
-
                     } else {
-                        $insertLocCustom = $this->find_option_location1($new_options,
-                            ['id' => 'divi_show_' . $haystackInsertLocList[$option_name] . '_icon']);
+                        $insertLocCustom = $this->find_option_location1(
+                            $new_options,
+                            ['id' => 'divi_show_' . $haystackInsertLocList[$option_name] . '_icon']
+                        );
 
                         // if the item is not found for some reason, fall back to the base array insert location
                         if (!$insertLocCustom[0]) {
@@ -507,7 +504,6 @@ class AW_Divi_Social_Media
                     // reset the new_options array
                     $extracted_options = [];
                 }
-
             }
 
             // build the new tab content for the socials tab
@@ -552,8 +548,10 @@ class AW_Divi_Social_Media
             array_splice($options, $loc[1] + 1, 0, $new_options);
 
             // insert the new options in to the main options array
-            $optionKey = $this->find_option_location1($original_options,
-                array("name" => "wrap-general", "type" => "contenttab-wrapend"));
+            $optionKey = $this->find_option_location1(
+                $original_options,
+                array("name" => "wrap-general", "type" => "contenttab-wrapend")
+            );
             array_splice($original_options, $optionKey[1] + 1, 0, $options);
 
             // return the updated settings array
@@ -568,11 +566,10 @@ class AW_Divi_Social_Media
     private function find_option_location1($options_list, $search_list)
     {
         //
-        aw_debug(' - function executed: find_option_location');
+        $this->aw_debug(' - function executed: find_option_location');
 
         //
         foreach ($options_list as $optionKey => $optionValue) {
-
             //var_dump($optionKey . '] ' . $optionValue['id'] . ' - ' . $optionValue['name']. ' , ' . $optionValue['type']);
 
             $match = false;
@@ -587,7 +584,6 @@ class AW_Divi_Social_Media
             if ($match) {
                 return [true, $optionKey];
             }
-
         }
         return [false];
     }
@@ -595,7 +591,7 @@ class AW_Divi_Social_Media
     private function find_option_location($options_list, $search_item, $search_key)
     {
         //
-        aw_debug(' - function executed: find_option_location');
+        $this->aw_debug(' - function executed: find_option_location');
 
         //
         foreach ($options_list as $optionKey => $optionValue) {
@@ -617,7 +613,7 @@ class AW_Divi_Social_Media
     public function ob_start()
     {
         //
-        aw_debug(' - function executed: ob_start');
+        $this->aw_debug(' - function executed: ob_start');
 
         //
         ob_start();
@@ -629,7 +625,7 @@ class AW_Divi_Social_Media
     public function ob_end()
     {
         //
-        aw_debug(' - function executed: ob_end');
+        $this->aw_debug(' - function executed: ob_end');
 
         //
         $content = ob_get_clean();
@@ -651,7 +647,7 @@ class AW_Divi_Social_Media
     public function update_et_html_top_header($top_header)
     {
         //
-        aw_debug(' - function executed: update_et_html_top_header');
+        $this->aw_debug(' - function executed: update_et_html_top_header');
 
         //
         $social_icons = $this->get_social_icons();
@@ -667,7 +663,7 @@ class AW_Divi_Social_Media
     public function get_social_icons()
     {
         //
-        aw_debug(' - function executed: get_social_icons');
+        $this->aw_debug(' - function executed: get_social_icons');
 
         //
         ob_start();
@@ -675,27 +671,22 @@ class AW_Divi_Social_Media
         return ob_get_clean();
     }
 
+
+    public function aw_debug($data)
+    {
+        if ($this->debug_enabled) {
+            $file = plugin_dir_path(__FILE__) . 'awds.log.' . date('d-m-Y') . '.txt';
+            if (!is_file($file)) {
+                file_put_contents($file, '');
+            }
+            $data_string = print_r($data, true) . "\n";
+            file_put_contents($file, $data_string, FILE_APPEND);
+        }
+    }
 }
 
 // Instantiate the plugin class
 $aw_divi_social_media = AW_Divi_Social_Media::instance(__FILE__, AW_DS_VERSION);
-
-
-
-function aw_debug($data)
-{
-    global $aw_divi_social_media;
-
-    if ($aw_divi_social_media->debug_enabled) {
-        $file = plugin_dir_path(__FILE__) . 'awds.log.' . date('d-m-Y') . '.txt';
-        if (!is_file($file)) {
-            file_put_contents($file, '');
-        }
-        $data_string = print_r($data, true) . "\n";
-        file_put_contents($file, $data_string, FILE_APPEND);
-    }
-}
-
 
 /* --------------------------------------------- */
 /*
